@@ -21,6 +21,7 @@ pub mod buzzer_driver;
 pub mod console;
 pub mod crc;
 pub mod dac;
+pub mod dals;
 pub mod debug_process_restart;
 pub mod driver;
 pub mod fm25cl;
