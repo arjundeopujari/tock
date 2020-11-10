@@ -1,4 +1,4 @@
-//! All interfaces between modules for `dals`
+//! All interfaces between capsules for `DALS`
 
 /// Errors which prevent an app from being loaded into memory. 
 pub enum LoadingError {
