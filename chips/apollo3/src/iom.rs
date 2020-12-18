@@ -359,6 +359,10 @@ impl<'a> Iom<'_> {
         let mut data_pushed = self.write_index.get();
         let len = self.write_len.get();
 
+        if data_pushed == len {
+            return;
+        }
+
         self.buffer.map(|buf| {
             // Push some data to FIFO
             for i in (data_pushed / 4)..(len / 4) {
@@ -387,14 +391,14 @@ impl<'a> Iom<'_> {
 
                     regs.fifopush.set(d);
                 } else if len % 4 == 2 {
-                    let mut d = (buf[len as usize - 2] as u32) << 8;
-                    d |= (buf[len as usize - 1] as u32) << 0;
+                    let mut d = (buf[len as usize - 1] as u32) << 8;
+                    d |= (buf[len as usize - 2] as u32) << 0;
 
                     regs.fifopush.set(d);
                 } else if len % 4 == 3 {
-                    let mut d = (buf[len as usize - 3] as u32) << 16;
+                    let mut d = (buf[len as usize - 1] as u32) << 16;
                     d |= (buf[len as usize - 2] as u32) << 8;
-                    d |= (buf[len as usize - 1] as u32) << 0;
+                    d |= (buf[len as usize - 3] as u32) << 0;
 
                     regs.fifopush.set(d);
                 }
@@ -408,12 +412,16 @@ impl<'a> Iom<'_> {
         let mut data_popped = self.read_index.get();
         let len = self.read_len.get();
 
+        if data_popped == len {
+            return;
+        }
+
         self.buffer.map(|buf| {
             // Pop some data from the FIFO
             for i in (data_popped / 4)..(len / 4) {
                 let data_idx = i * 4;
 
-                if regs.fifoptr.read(FIFOPTR::FIFO1REM) <= 4 {
+                if regs.fifoptr.read(FIFOPTR::FIFO1SIZ) < 4 {
                     self.read_index.set(data_popped as usize);
                     break;
                 }
