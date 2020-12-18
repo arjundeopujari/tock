@@ -88,7 +88,8 @@ This capsule must contain an immutable reference to the app binary data in flash
 ## Validator
 
 This capsule implements `pub trait Validator<'a>`.  This capsule contains an algorithm which 
-performs validation on the app data in flash according to a user specification.  It could check the 
+performs validation on the app data in flash according to a user specification. This allows the
+kernel to check if it actually wants to run the newly loaded app. The validator can check the 
 app's length, version, or header info for any salient features.
 
 This capsule must contain an immutable reference to the app binary data in flash space.
