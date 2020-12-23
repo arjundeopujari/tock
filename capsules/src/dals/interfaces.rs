@@ -1,5 +1,5 @@
 //! All interfaces between capsules for `DALS`
-
+/*
 /// Errors which prevent an app from being loaded into memory.
 pub enum LoadingError {
     //TODO
@@ -67,3 +67,4 @@ pub trait Validator<'a> {
 pub trait ValidatorClient<'a> {
     fn validation_complete(&self, error: Option<ValidationError>);
 }
+*/

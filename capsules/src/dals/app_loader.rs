@@ -1,7 +1,7 @@
 //! Code for the "AppLoader".  This capsule is the heart of the "DALS" system and is
 //! in charge of coordinating the whole application loading process which includes 
 //! sending/receiving data to/from peripheral capsules in "DALS"hjkhjkhjkhjkhjssssdddssfffddd
-
+/*
 use core::cell::Cell;
 use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil;
@@ -128,3 +128,4 @@ impl<'a> hil::nonvolatile_storage::NonvolatileStorageClient<'a> for AppLoader<'a
         self.process_state(Some(buffer),Some(length),None);
     }
 }
+*/
