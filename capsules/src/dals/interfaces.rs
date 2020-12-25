@@ -1,5 +1,5 @@
 //! All interfaces between capsules for `DALS`
-/*
+
 /// Errors which prevent an app from being loaded into memory.
 pub enum LoadingError {
     //TODO
@@ -44,7 +44,6 @@ pub trait Decompressor<'a> {
     fn return_buffer(&self, decompressed_buffer: &'static [u8]);
 }
 
-
 /// Implemented by any module which provides an algorithm to verify the loaded app binary for security
 /// purposes (ex: SHA, Checksum, MD5 implementations)
 pub trait Verifier<'a> {
@@ -67,4 +66,3 @@ pub trait Validator<'a> {
 pub trait ValidatorClient<'a> {
     fn validation_complete(&self, error: Option<ValidationError>);
 }
-*/

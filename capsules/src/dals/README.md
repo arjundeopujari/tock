@@ -9,7 +9,7 @@ to be loaded and run by Tock is transmitted to a Tock-compatible board through a
 standard  communication protocol (BLE, Zigbee, USB, etc.) which provides "acks" or a similar service
 to lower data rates.  This data is then pushed 
 segment-by-segment through **DALS** which places it in an empty space in flash space and
-then sets up the process-specific elements for the newly-loaded app.
+then sets up the process-specific elements for the newly-loaded app.  
 
 ## Design
 
