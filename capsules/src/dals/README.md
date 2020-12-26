@@ -6,10 +6,10 @@ Dynamic App-Loading System (DALS)
 This document introduces the design for a novel system named **DALS** which allows 
 the Kernel to dynamically (at runtime) load and run apps.  The data for a new app 
 to be loaded and run by Tock is transmitted to a Tock-compatible board through any 
-standard  communication protocol (BLE, Zigbee, USB, etc.) which provides "acks" or a similar service
-to lower data rates.  This data is then pushed 
-segment-by-segment through **DALS** which places it in an empty space in flash space and
-then sets up the process-specific elements for the newly-loaded app.  
+standard  communication protocol for embedded systems (BLE, Zigbee, USB, etc.) which 
+provides "acks" or a similar service to lower data rates.  This data is then pushed 
+segment-by-segment through **DALS** which places it in an empty space in flash memory and
+then sets up the process-specific elements for the newly-loaded app.    
 
 ## Design
 
@@ -97,5 +97,5 @@ This capsule must contain an immutable reference to the app binary data in flash
 ## AppLoader
 
 This capsule implements `pub trait AppLoader<'a>`, `pub trait DecompressorClient<'a>`, 
-`pub trait VerifierClient<'a>`, and `pub trait ValidatorClient<'a>`.
+`pub trait VerifierClient<'a>`, and `pub trait ValidatorClient<'a>`.    
 
