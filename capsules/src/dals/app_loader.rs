@@ -1,6 +1,6 @@
 //! Code for the "AppLoader".  This capsule is the heart of the "DALS" and is
 //! in charge of coordinating the whole application-loading process which includes
-//! sending/receiving data to/from peripheral capsules in "DALS
+//! sending/receiving data to/from peripheral capsules in "DALS"
 
 use crate::dals::interfaces;
 use crate::dals::interfaces::DalsError;
