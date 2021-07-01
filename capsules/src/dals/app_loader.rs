@@ -46,47 +46,102 @@ impl<'a> AppLoader<'a> {
     }
 
     /// Main FSM for DALS
-    pub fn action_complete(&self, optional_buffer: Option<&'static mut [u8]>, optional_length: Option<usize>, optional_bool: Option<bool>) {
-        match self.state.get(){
+    pub fn action_complete(
+        &self,
+        optional_buffer: Option<&'static mut [u8]>,
+        optional_length: Option<usize>,
+        optional_bool: Option<bool>,
+    ) {
+        match self.state.get() {
             State::a => {
-                
                 // Received buffer w/data from AL Client but it is not the last buffer.
                 let buffer = optional_buffer.unwrap();
                 let length = optional_length.unwrap();
 
-                let (decompressed_buffer, dec_buf_length, buffer, status) = self.decompressor.decompress_buffer(buffer, length);
+                let (decompressed_buffer, dec_buf_length, buffer, dec_status) =
+                    self.decompressor.decompress_buffer(buffer, length);
 
-                match status {
-                    Some(error) => {
+                match dec_status {
+                    Ok(_) => {}
+                    Err(error) => {
                         self.app_loader_client.return_error(error);
+                        return;
                     }
-                    None => {}
                 }
 
-                self.app_write_address.set(self.app_write_address.get() + dec_buf_length);
+                let current_write_address : usize = self.app_write_address.get();
+
+                self.app_write_address
+                    .set(self.app_write_address.get() + dec_buf_length);
 
                 self.app_loader_client.return_buffer(buffer);
 
-                self.nonvol_storage.write(decompressed_buffer, self.app_write_address.get() , dec_buf_length);
+                let write_status = self.nonvol_storage.write(
+                    decompressed_buffer,
+                    current_write_address,
+                    dec_buf_length,
+                );
 
+                match write_status {
+                    Ok(_) => {}
+                    Err(_) => {
+                        self.app_loader_client.return_error(DalsError::NonVolatileStorageWrite);
+                        return;
+                    }
+                }
             }
             State::b => {
                 // Received buffer w/data from AL Client and it is the last buffer.
+                let buffer = optional_buffer.unwrap();
+                let length = optional_length.unwrap();
+
+                let (decompressed_buffer, dec_buf_length, buffer, dec_status) =
+                    self.decompressor.decompress_buffer(buffer, length);
+
+                match dec_status {
+                    Ok(_) => {}
+                    Err(error) => {
+                        self.app_loader_client.return_error(error);
+                        return;
+                    }
+                }
+
+                let current_write_address : usize = self.app_write_address.get();
+
+                self.app_write_address
+                    .set(self.app_write_address.get() + dec_buf_length);
+
+                self.app_loader_client.return_buffer(buffer);
+
+                self.state.set(State::c);
+
+                let write_status = self.nonvol_storage.write(
+                    decompressed_buffer,
+                    current_write_address,
+                    dec_buf_length,
+                );
+
+                match write_status {
+                    Ok(_) => {}
+                    Err(_) => {
+                        self.app_loader_client.return_error(DalsError::NonVolatileStorageWrite);
+                        return;
+                    }
+                }
             }
             State::c => {
-
+                self.verifier.send_nonvolstorage_ref(self.nonvol_storage);
             }
             _ => {}
         }
     }
-
 }
 
 impl<'a> interfaces::AppLoader<'a> for AppLoader<'a> {
     fn start_loading(&self, app_size: usize) -> Result<(), DalsError> {
         Ok(())
     }
-    fn next_buffer(&self, data_buffer: &'static mut [u8], length: usize, completed: bool){
+    fn next_buffer(&self, data_buffer: &'static mut [u8], length: usize, completed: bool) {
         if completed {
             self.state.set(State::b);
         } else {
@@ -97,17 +152,22 @@ impl<'a> interfaces::AppLoader<'a> for AppLoader<'a> {
 }
 
 impl<'a> interfaces::VerifierClient for AppLoader<'a> {
-    fn verification_complete(&self, error: Option<DalsError>){
-
-    }
+    fn verification_complete(&self, error: Option<DalsError>) {}
 }
 
 impl<'a> nonvolatile_storage::NonvolatileStorageClient<'a> for AppLoader<'a> {
-    fn read_done(&self, buffer: &'static mut [u8], length: usize){
+    fn read_done(&self, buffer: &'static mut [u8], length: usize) {}
+    fn write_done(&self, buffer: &'static mut [u8], length: usize) {
 
-    }
-    fn write_done(&self, buffer: &'static mut [u8], length: usize){
-        self.state.set(State::c);
-        self.action_complete(Some(buffer), Some(length), None);
+        if (self.state.get() == State::a || self.state.get() == State::b){
+
+            self.action_complete(Some(buffer), Some(length), None);
+
+        } else if (self.state.get() == State::c) {
+
+            self.action_complete(Some(buffer), Some(length), None);
+
+        }
+
     }
 }

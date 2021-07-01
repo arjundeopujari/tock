@@ -10,12 +10,22 @@ pub trait NonvolatileStorage<'a> {
     /// Read `length` bytes starting at address `address` in to the provided
     /// buffer. The buffer must be at least `length` bytes long. The address
     /// must be in the address space of the physical storage.
-    fn read(&self, buffer: &'static mut [u8], address: usize, length: usize) -> Result<(), ErrorCode>;
+    fn read(
+        &self,
+        buffer: &'static mut [u8],
+        address: usize,
+        length: usize,
+    ) -> Result<(), ErrorCode>;
 
     /// Write `length` bytes starting at address `address` from the provided
     /// buffer. The buffer must be at least `length` bytes long. This address
     /// must be in the address space of the physical storage.
-    fn write(&self, buffer: &'static mut [u8], address: usize, length: usize) -> Result<(), ErrorCode>;
+    fn write(
+        &self,
+        buffer: &'static mut [u8],
+        address: usize,
+        length: usize,
+    ) -> Result<(), ErrorCode>;
 }
 
 /// Client interface for nonvolatile storage.
