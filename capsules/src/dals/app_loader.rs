@@ -64,6 +64,7 @@ impl<'a> AppLoader<'a> {
                 match dec_status {
                     Ok(_) => {}
                     Err(error) => {
+                        self.state.set(State::Idle);
                         self.app_loader_client.return_error(error);
                         return;
                     }
@@ -85,6 +86,7 @@ impl<'a> AppLoader<'a> {
                 match write_status {
                     Ok(_) => {}
                     Err(_) => {
+                        self.state.set(State::Idle);
                         self.app_loader_client.return_error(DalsError::NonVolatileStorageWrite);
                         return;
                     }
@@ -101,6 +103,7 @@ impl<'a> AppLoader<'a> {
                 match dec_status {
                     Ok(_) => {}
                     Err(error) => {
+                        self.state.set(State::Idle);
                         self.app_loader_client.return_error(error);
                         return;
                     }
@@ -124,13 +127,29 @@ impl<'a> AppLoader<'a> {
                 match write_status {
                     Ok(_) => {}
                     Err(_) => {
+                        self.state.set(State::Idle);
                         self.app_loader_client.return_error(DalsError::NonVolatileStorageWrite);
                         return;
                     }
                 }
             }
             State::c => {
-                self.verifier.send_nonvolstorage_ref(self.nonvol_storage);
+                self.verifier.verify_data(self.nonvol_storage, self.app_write_address.get());
+            }
+            State::d => {
+                let auth_result = self.authorizer.authorize_data(self.nonvol_storage, self.app_write_address.get());
+                match auth_result {
+                    Ok(_) => {}
+                    Err(error) => {
+                        self.state.set(State::Idle);
+                        self.app_loader_client.return_error(error);
+                        return;
+                    }
+                }
+                
+                // Complete! App is ready to be run on the system now.
+
+
             }
             _ => {}
         }
@@ -152,7 +171,18 @@ impl<'a> interfaces::AppLoader<'a> for AppLoader<'a> {
 }
 
 impl<'a> interfaces::VerifierClient for AppLoader<'a> {
-    fn verification_complete(&self, error: Option<DalsError>) {}
+    fn verification_complete(&self, error: Option<DalsError>) {
+        match error {
+            Some(error) => {
+                self.state.set(State::Idle);
+                self.app_loader_client.return_error(error);
+                return;
+            }
+            None => {}
+        }
+        self.state.set(State::d);
+
+    }
 }
 
 impl<'a> nonvolatile_storage::NonvolatileStorageClient<'a> for AppLoader<'a> {

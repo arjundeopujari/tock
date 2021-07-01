@@ -41,8 +41,7 @@ pub trait Decompressor<'a> {
 /// Ex: Capsules which compute a checksum or SHA digest
 pub trait Verifier<'a>: nonvolatile_storage::NonvolatileStorageClient<'a>{
     fn set_client(&self, client: &'a dyn VerifierClient);
-    fn verify_data(&self, app_flash: usize);
-    fn send_nonvolstorage_ref(&self, nonvol_storage: &'a dyn nonvolatile_storage::NonvolatileStorage<'a>);
+    fn verify_data(&self, nonvol_storage: &'a dyn nonvolatile_storage::NonvolatileStorage<'a>, app_flash: usize);
 }
 
 /// Implemented by main `AppLoader` module
@@ -54,5 +53,5 @@ pub trait VerifierClient {
 /// This allocates the process's memory in SRAM, sets up process data structures in the kernel, and configures the MPU.
 pub trait Authorizer<'a> {
     fn set_client(&self, client: &'a dyn AppLoader<'a>);
-    fn authorize_data(&self, app_flash: usize) -> Result<(),DalsError>;
+    fn authorize_data(&self, nonvol_storage: &'a dyn nonvolatile_storage::NonvolatileStorage<'a>, app_flash: usize) -> Result<(),DalsError>;
 }
