@@ -23,6 +23,7 @@ pub mod console;
 pub mod crc;
 pub mod ctap;
 pub mod dac;
+pub mod dals;
 pub mod debug_process_restart;
 pub mod driver;
 pub mod fm25cl;
